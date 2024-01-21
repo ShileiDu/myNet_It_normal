@@ -151,8 +151,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--patches_per_shape_per_epoch', type=int, default=1000)
     parser.add_argument('--patch_ratio', type=float, default=1.2)
-    parser.add_argument('--train_batch_size', type=int, default=8)
-    parser.add_argument('--num_workers', type=int, default=2)
+    parser.add_argument('--train_batch_size', type=int, default=128)
+    parser.add_argument('--num_workers', type=int, default=16)
 
     parser.add_argument('--resume', type=str, default='', help='refine model at this path')
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument('--noise_decay', type=int, default=4)  # Noise decay is set to 16/T where T=num_modules or set to 1 for no decay
 
     args = parser.parse_args()
-    args.resume = './Summary/Train/model_full_ae_6.pth'
+    # args.resume = './Summary/Train/model_full_ae_6.pth'
     args.nepoch = 50
     print(args)
     train(args)
