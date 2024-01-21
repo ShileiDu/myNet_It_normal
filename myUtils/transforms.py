@@ -23,7 +23,7 @@ class NormalizeUnitSphere(object):
             # pcl.max(dim=0, keepdim=True)[1]，2维tensor，1行3列，每一列保存pcl每一列的最大值的下标
             p_max = pcl.max(dim=0, keepdim=True)[0]
             p_min = pcl.min(dim=0, keepdim=True)[0]
-            center = (p_max + p_min) / 2  # (1, 3),center是一个2维tense，1行3列
+            center = (p_max + p_min) / 2    # (1, 3),center是一个2维tense，1行3列
         pcl = pcl - center
         if scale is None:
             # sum(dim=1, keepdim=True)求每一行的xyz和，返回2维tensor,shape(点的个数，1)
@@ -38,6 +38,7 @@ class NormalizeUnitSphere(object):
         data['center'] = center
         data['scale'] = scale
         return data
+
 
 
 class AddNoise(object):

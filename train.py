@@ -4,9 +4,7 @@ import torch.utils.data
 import torch.optim as optim
 import numpy as np
 
-from models.denoise import DenoiseNet
-# from myUtils.pcl import *
-# from myUtils.patch import *
+from denoise1 import DenoiseNet
 from myUtils.adjustLR import *
 from myUtils.myLoss import *
 from myUtils.misc import str_list
@@ -29,8 +27,8 @@ def train(args):
 
 
     ## 3.创建种子
-    np.random.seed(args.manualSeed)
-    torch.manual_seed(args.manualSeed)
+    # np.random.seed(args.manualSeed)
+    # torch.manual_seed(args.manualSeed)
 
 
     ## 4.实例化网络
@@ -106,27 +104,6 @@ def train(args):
             pcl_clean = train_batch['pcl_clean'].float().cuda(non_blocking=True)
             pcl_seeds = train_batch['seed_pnts'].float().cuda(non_blocking=True)
             pcl_std = train_batch['pcl_std'].float().cuda(non_blocking=True)
-            # 一批对齐后且个数为patch_size=1000的噪声patch，三维tensor，shape(B32, 1000, 3)
-            # 一批对齐后且个数为patch_size*ratio=1200的干净patch，三维tensor，shape(B32, 1200, 3)
-            # 一批对齐后且个数为patch_size*ratio=1200的干净patch法线，三维tensor，shape(B32, 1200, 3)
-            # 一批upport_radius支持半径是二维tensor，shape[B32, 1]
-            # gt_normal = gt_normal.float().cuda(non_blocking=True)
-
-            # opt.support_multiple=4.0
-            # support_radius = args.support_multiple * support_radius # support_radius没有开根号，论文中开根号了
-            # support_radius = support_radius.float().cuda(non_blocking=True)
-            # support_angle =  (args.support_angle / 360) * 2 * np.pi
-            # print("pcl_noisy.shape", pcl_noisy.shape)
-            # pcl_noisy = pcl_noisy.transpose(2, 1).contiguous()
-            # print("pcl_noisy.shape", pcl_noisy.shape)
-
-            # 三维tensor，shape(B32, 3, 1000)
-            # pred_dis = denoisenet(pcl_noisy) # 输出的是预测的位移，#pred_dis.shape(32, 1000, 3)
-            # pcl_noisy = pcl_noisy.transpose(2, 1).contiguous() # 三维tensor，shape(B32, 1000, 3)
-            # print("pcl_noisy.shape", pcl_noisy.shape)
-            # print("pred_dis.shape", pred_dis.shape)
-            # print("pcl_clean.shape", pcl_clean.shape)
-
 
             ## 计算损失
             #要输入原来的噪声点noise_patch，以及位移pred_dis，以及干净点gt_patch
@@ -181,6 +158,7 @@ if __name__ == "__main__":
 
     ## train
     parser.add_argument('--start_epoch', type=int, default=0, help='')
+    parser.add_argument('--model_interval', type=int, default=1)
 
 
     # Ablation parameters
@@ -189,6 +167,7 @@ if __name__ == "__main__":
     parser.add_argument('--noise_decay', type=int, default=4)  # Noise decay is set to 16/T where T=num_modules or set to 1 for no decay
 
     args = parser.parse_args()
-    args.nepoch = 3
+    args.resume = './Summary/Train/model_full_ae_6.pth'
+    args.nepoch = 50
     print(args)
     train(args)
