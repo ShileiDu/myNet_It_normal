@@ -4,7 +4,7 @@ import torch.utils.data
 import torch.optim as optim
 import numpy as np
 
-from denoise1 import DenoiseNet
+from denoise2 import DenoiseNet
 from myUtils.adjustLR import *
 from myUtils.myLoss import *
 from myUtils.misc import str_list
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument('--patches_per_shape_per_epoch', type=int, default=1000)
     parser.add_argument('--patch_ratio', type=float, default=1.2)
     parser.add_argument('--train_batch_size', type=int, default=128)
-    parser.add_argument('--num_workers', type=int, default=16)
+    parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--resume', type=str, default='', help='refine model at this path')
 

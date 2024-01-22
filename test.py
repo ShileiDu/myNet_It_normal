@@ -7,6 +7,8 @@ from multiprocessing import Pool
 from myUtils.transforms import *
 from myUtils.misc import *
 from denoise1 import *
+from Evaluate import Evaluator
+
 
 # Arguments
 parser = argparse.ArgumentParser()
@@ -17,7 +19,7 @@ parser.add_argument('--input_root', type=str, default='./data/examples')
 parser.add_argument('--dataset', type=str, default='PUNet')
 parser.add_argument('--tag', type=str, default='')
 parser.add_argument('--output_root', type=str, default='./data/results')
-parser.add_argument('--eval_dir', type=str, default='./pretrained', help='')
+parser.add_argument('--eval_dir', type=str, default='./Summary/IterativePNF_model', help='')
 parser.add_argument('--device', type=str, default='cuda')
 parser.add_argument('--niters', type=int, default=1)
 parser.add_argument('--patch_stitching', type=bool, default=True, help='Use patch stitching or not?')
@@ -25,6 +27,7 @@ parser.add_argument('--patch_size', type=int, default=1000)
 parser.add_argument('--seed_k', type=int, default=6)  # 6 for Kinect, 6 for small PCL, 6 for RueMadame PCL
 parser.add_argument('--seed_k_alpha', type=int, default=10)  # 2 for Kinect, 10 for small PCL, 20 for RueMadame PCL
 parser.add_argument('--num_modules_to_use', type=int, default=None)
+parser.add_argument('--dataset_root', type=str, default='./data')
 
 
 
@@ -72,13 +75,16 @@ def main(noise):
 
         ## 3.实例化模型,加载模型
         pointfilter_eval = DenoiseNet()
-        model_filename = os.path.join(args.eval_dir, 'model_full_ae_6.pth')
+        model_filename = os.path.join(args.eval_dir, 'IterativePf_ae_0.pth')
+        print("model_filename", model_filename)
+
         checkpoint = torch.load(model_filename)
         pointfilter_eval.load_state_dict(checkpoint['state_dict'])
         pointfilter_eval.cuda()
 
         # Denoise
         for data in input_iter(input_dir):
+            print(data['name'])
             pcl_noisy = data['pcl_noisy'].to(args.device)  # 数据移到cuda上
             with torch.no_grad():
                 pointfilter_eval.eval()
@@ -99,7 +105,26 @@ def main(noise):
 
             save_path = os.path.join(output_dir, data['name'] + '.xyz')
             np.savetxt(save_path, pcl_denoised.numpy(), fmt='%.8f')
-            break
+
+        if not args.dataset.startswith('RueMadame'):
+            # Evaluate
+            # output_dir=./data/results\PUNet_Ours__50000_poisson_0.01
+            # dataset_root=./data
+            # dataset = PUNet
+            # summary_dir = ./data/results
+            # save_title = PUNet_Ours__50000_poisson_0.01
+            # device = cuda
+            # res_gts = 50000_poisson
+            evaluator = Evaluator(
+                output_pcl_dir=output_dir,
+                dataset_root=args.dataset_root,
+                dataset='PUNet' if args.dataset.startswith('PUNet') else args.dataset,
+                summary_dir=args.output_root,
+                experiment_name=save_title,
+                device=args.device,
+                res_gts=resolution
+            )
+            evaluator.run()
 
 
 
