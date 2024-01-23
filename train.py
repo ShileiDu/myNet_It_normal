@@ -11,7 +11,7 @@ from myUtils.misc import str_list
 from myUtils.pcl import PointCloudDataset
 from myUtils.patch import PairedPatchDataset
 from myUtils.transforms import standard_train_transforms
-
+# from tensorboardX import SummaryWriter
 
 def train(args):
 
@@ -43,7 +43,7 @@ def train(args):
         lr=args.lr,
         momentum=args.momentum)
 
-
+    # train_writer = SummaryWriter(args.summary_train)
     ## 5.2加载pth
     # resume = './Summary/Train/model_full_ae_8.pth'
     if args.resume:
@@ -115,7 +115,7 @@ def train(args):
 
             ## 记录训练过程
             print('[%d: %d/%d] train loss: %f\n' % (epoch, batch_ind, num_batch, loss.item()))
-        # train_writer.add_scalar('loss', loss.data.item(), epoch * num_batch + batch_ind)
+            # train_writer.add_scalar('loss', loss.data.item(), epoch * num_batch + batch_ind)
 
         ## 保存模型
         checpoint_state = {
@@ -151,8 +151,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--patches_per_shape_per_epoch', type=int, default=1000)
     parser.add_argument('--patch_ratio', type=float, default=1.2)
-    parser.add_argument('--train_batch_size', type=int, default=128)
-    parser.add_argument('--num_workers', type=int, default=4)
+    parser.add_argument('--train_batch_size', type=int, default=4)
+    parser.add_argument('--num_workers', type=int, default=0)
 
     parser.add_argument('--resume', type=str, default='', help='refine model at this path')
 
@@ -167,7 +167,8 @@ if __name__ == "__main__":
     parser.add_argument('--noise_decay', type=int, default=4)  # Noise decay is set to 16/T where T=num_modules or set to 1 for no decay
 
     args = parser.parse_args()
-    # args.resume = './Summary/Train/model_full_ae_6.pth'
+    args.resume = './Summary/IterativeNet_model/model_It_ae_38.pth'
+    # args.summary_train = './tf-logs'#服务器的log地址
     args.nepoch = 50
     print(args)
     train(args)
